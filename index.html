@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sambal Pedas Mantap - Best Seller</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #fff8f0; text-align: center; }
+        
+        nav {
+            background: #d32f2f; color: white; padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000;
+        }
+        #cart-btn { background: #ffeb3b; color: #d32f2f; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 900; cursor: pointer; }
+
+        .container { max-width: 600px; margin: 50px auto; padding: 20px; }
+        
+        .menu-card {
+            background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .menu-card img { width: 100%; height: 350px; object-fit: cover; }
+        .menu-info { padding: 30px; }
+        .menu-info h1 { color: #d32f2f; font-size: 32px; }
+        .menu-info p { color: #555; margin: 15px 0; font-size: 16px; }
+        .harga { font-size: 36px; font-weight: 900; color: #ff6f00; margin: 20px 0; }
+        .btn-add {
+            width: 100%; background: #25D366; color: white; border: none; padding: 18px;
+            border-radius: 15px; font-weight: 900; font-size: 20px; cursor: pointer;
+        }
+        .btn-add:hover { background: #1ebe57; transform: scale(1.02); }
+
+        /* KERANJANG POPUP */
+        .cart-sidebar {
+            position: fixed; top: 0; right: -400px; width: 350px; height: 100%;
+            background: white; box-shadow: -5px 0 20px rgba(0,0,0,0.2);
+            transition: 0.4s; padding: 20px; z-index: 2000; text-align: left;
+        }
+        .cart-sidebar.active { right: 0; }
+        .cart-item { margin: 15px 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .cart-total { font-size: 24px; font-weight: 900; color: #d32f2f; margin-top: 20px; }
+        .btn-checkout {
+            width: 100%; background: #d32f2f; color: white; border: none; padding: 15px;
+            border-radius: 10px; font-weight: 900; font-size: 18px; cursor: pointer; margin-top: 20px;
+        }
+        .close-cart { float: right; font-size: 28px; cursor: pointer; color: #999; }
+    </style>
+</head>
+<body>
+    <nav>
+        <h2>🌶️ SAMBAL MANTAP</h2>
+        <button id="cart-btn">🛒 Keranjang (<span id="cart-count">0</span>)</button>
+    </nav>
+
+    <div class="container">
+        <div class="menu-card">
+            <img src="sambal.jpg" alt="Sambal cabe full">
+            <div class="menu-info">
+                <h1>Sambal cabe full</h1>
+                <p>cabe pilihan. Cocok buat semua lauk. Dijamin ketagihan 😋</p>
+                <div class="harga">Rp 15.000</div>
+                <button class="btn-add" onclick="addToCart('Sambal cabe Premium', 25000)">+ MASUKKAN KERANJANG</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KERANJANG -->
+    <div class="cart-sidebar" id="cart">
+        <span class="close-cart" onclick="toggleCart()">×</span>
+        <h2>Keranjang Kamu</h2>
+        <div id="cart-items">Keranjang masih kosong</div>
+        <div class="cart-total">Total: Rp <span id="cart-total">0</span></div>
+        <button class="btn-checkout" onclick="checkout()">Checkout via WhatsApp</button>
+    </div>
+
+    <script>
+        let cart = [];
+
+        function addToCart(nama, harga) {
+            let item = cart.find(i => i.nama === nama);
+            if (item) { item.qty++; } 
+            else { cart.push({nama, harga, qty: 1}); }
+            updateCart();
+            alert(nama + " ditambahkan!");
+        }
+
+        function updateCart() {
+            let cartItems = document.getElementById('cart-items');
+            let total = 0;
+            let count = 0;
+            cartItems.innerHTML = '';
+            
+            if(cart.length === 0) {
+                cartItems.innerHTML = 'Keranjang masih kosong';
+            }
+
+            cart.forEach((item, index) => {
+                total += item.harga * item.qty;
+                count += item.qty;
+                cartItems.innerHTML += `
+                    <div class="cart-item">
+                        <b>${item.nama}</b><br>
+                        ${item.qty} x Rp ${item.harga.toLocaleString()} 
+                        = <b>Rp ${(item.harga*item.qty).toLocaleString()}</b>
+                        <button onclick="removeItem(${index})" style="float:right;">Hapus</button>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('cart-total').innerText = total.toLocaleString();
+            document.getElementById('cart-count').innerText = count;
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        function toggleCart() {
+            document.getElementById('cart').classList.toggle('active');
+        }
+
+        function checkout() {
+            if(cart.length === 0) { alert('Keranjang kosong!'); return; }
+            let pesan = "Halo, saya mau pesan:%0A";
+            cart.forEach(item => {
+                pesan += `- ${item.nama} (${item.qty}x) = Rp ${(item.harga*item.qty).toLocaleString()}%0A`;
+            });
+            pesan += `%0ATotal: Rp ${document.getElementById('cart-total').innerText}`;
+            window.open(`https://wa.me/6281238973645?text=${pesan}`, '_blank');
+        }
+
+        document.getElementById('cart-btn').onclick = toggleCart;
+    </script>
+</body>
+</html>
